@@ -8,10 +8,11 @@ pylint = {version = "*",editable = true}
 pytest = "*"
 autopep8 = "*"
 requests = "*"
+rope = "*"
 
 [packages]
+flask = "*"
 fastjsonschema = "*"
 
 [requires]
 python_version = "3.8"
-
