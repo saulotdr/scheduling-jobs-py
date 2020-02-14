@@ -8,10 +8,9 @@ WINDOW_BEGIN = 'JANELA_INICIO'
 WINDOW_END = 'JANELA_FIM'
 
 ''' Environment variables '''
-PRETTY_PRINT = env['PRETTY_PRINT'] if 'PRETTY_PRINT' in env else False
 LOGGING_LEVEL = env['LOG_LVL'] if 'LOG_LVL' in env else logging.ERROR
 
 ''' Logging configuration '''
 logging.basicConfig(level=LOGGING_LEVEL,
-                    stream=stdout,
-                    format='%(asctime)s [%(levelname)s] - %(funcName)s: %(message)s')
+            stream=stdout,
+            format='%(asctime)s [%(levelname)s] - %(funcName)s: %(message)s')
