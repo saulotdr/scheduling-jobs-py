@@ -19,7 +19,8 @@ schema = compile_schema({
         },
         'Data Máxima de conclusão': {
             'description': 'Data máxima para execução do job',
-            'type': 'string'
+            'type': 'string',
+            'format': 'date'
         },
         'Tempo estimado': {
             'description': 'Duração estimada do job',
