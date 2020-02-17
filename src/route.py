@@ -2,12 +2,14 @@ import constants
 import response
 import validation
 
-from json import dumps
-from re import findall
 from datetime import datetime as dt
 from fastjsonschema import JsonSchemaException
-from logging import getLogger
 from flask import Flask, request
+from json import dumps
+from logging import getLogger
+from math import ceil
+from operator import itemgetter as get_item
+from re import findall
 
 ''' Module logger configuration '''
 logger = getLogger(__name__)
@@ -15,9 +17,9 @@ logger = getLogger(__name__)
 ''' Flask configuration '''
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
-window = dict()
+window_info = dict()
 
 
 @app.route('/api/jobs', methods=['POST'])
@@ -33,14 +35,14 @@ def process_jobs_array():
         return response.error()
     fill_window()
     fill_payload()
-    return response.ok({'r': 'Ok'})
+    return response.ok(get_jobid_array())
 
 
 def validate_input():
     headers, payload = request.headers, request.json
-    if constants.WINDOW_BEGIN not in headers or not headers[constants.WINDOW_BEGIN]:
+    if constants.WINDOW_BEGIN_KEY not in headers or not headers[constants.WINDOW_BEGIN_KEY]:
         raise JsonSchemaException('Header must contains "JANELA_INICIO"')
-    if constants.WINDOW_END not in headers or not headers[constants.WINDOW_END]:
+    if constants.WINDOW_END_KEY not in headers or not headers[constants.WINDOW_END_KEY]:
         raise JsonSchemaException('Header must contains "JANELA_FIM"')
     if payload is None or not payload:
         raise JsonSchemaException('Payload must not be empty')
@@ -50,12 +52,12 @@ def validate_input():
 
 def fill_window():
     headers = request.headers
-    window['begin_ts'] = dt.strptime(
-        headers[constants.WINDOW_BEGIN], '%Y-%m-%d %H:%M:%S').timestamp()
-    window['end_ts'] = dt.strptime(
-        headers[constants.WINDOW_END], '%Y-%m-%d %H:%M:%S').timestamp()
-    window['duration'] = window['end_ts'] - window['begin_ts']
-    logger.debug(dumps(window, indent=4, ensure_ascii=False))
+    window_info['begin_ts'] = dt.strptime(
+        headers[constants.WINDOW_BEGIN_KEY], '%Y-%m-%d %H:%M:%S').timestamp()
+    window_info['end_ts'] = dt.strptime(
+        headers[constants.WINDOW_END_KEY], '%Y-%m-%d %H:%M:%S').timestamp()
+    window_info['duration'] = window_info['end_ts'] - window_info['begin_ts']
+    logger.debug(dumps(window_info, indent=4, ensure_ascii=False))
 
 
 def fill_payload():
@@ -68,5 +70,42 @@ def fill_payload():
         # and store it in a key-value pair.
         # regex will omit the string 'horas' from the string.
         job['duration'] = int(
-            findall(r"(?![horas])\w+", job['Tempo estimado'])[0]) * 60 * 60
+            findall(r"(?![hora])\w+", job['Tempo estimado'])[0]) * 3600
     logger.debug(dumps(payload, indent=4, ensure_ascii=False))
+
+
+def get_jobid_array():
+    payload = request.json
+    jobs = list()
+    for job in payload:
+        jobs.append({
+            'id': job['ID'],
+            'duration': job['duration'],
+            'timestamp': job['timestamp']
+        })
+    jobs_sorted = sorted(jobs, key=lambda k: k['timestamp'])
+    logger.debug('Sorted Job array: {0}'
+            .format(dumps(jobs_sorted, indent=4, ensure_ascii=False)))
+
+    jobid_array = list()
+    windows_len = ceil(window_info['duration'] / constants.WINDOW_DURATION)
+    logger.debug('Possible windows: {0}'.format(windows_len))
+
+    for window in range(windows_len):
+        window_list = list()
+        remaining_window_time = constants.WINDOW_DURATION
+        if not jobs_sorted:
+            break
+        for job in jobs_sorted:
+            if job['duration'] > remaining_window_time:
+                logger.debug('Window is full. Jumping to the next one')
+                break
+            window_list.append(job['id'])
+            remaining_window_time -= job['duration']
+            logger.debug('Job {0} added to the window. Remaining window time {1}'
+                    .format(job['id'], remaining_window_time))
+        jobs_sorted = [job for job in jobs_sorted if job['id'] not in window_list]
+        logger.debug('Jobs list updated: {0}'.format(jobs_sorted))
+        if window_list:
+            jobid_array.append(window_list)
+    return jobid_array

@@ -6,9 +6,9 @@ from http import HTTPStatus
 logger = logging.getLogger(__name__)
 
 
-def ok(response_array):
-    logger.debug(response_array)
-    return jsonify(response_array), HTTPStatus.OK, constants.JSON_HEADER
+def ok(response_list):
+    logger.debug(response_list)
+    return jsonify(response_list), HTTPStatus.OK, constants.JSON_HEADER
 
 
 def error():
