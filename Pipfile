@@ -9,6 +9,7 @@ pytest = "*"
 autopep8 = "*"
 requests = "*"
 rope = "*"
+pytest-flask = {editable = true,version = "*"}
 
 [packages]
 flask = "*"

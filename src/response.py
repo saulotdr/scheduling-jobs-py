@@ -1,4 +1,5 @@
-import constants
+import src.constants
+
 import logging
 from flask import jsonify
 from http import HTTPStatus
