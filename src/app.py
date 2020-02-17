@@ -52,10 +52,10 @@ def validate_input():
 
 def fill_window():
     headers = request.headers
-    window_info['begin_ts'] = dt.strptime(
-        headers[constants.WINDOW_BEGIN_KEY], '%Y-%m-%d %H:%M:%S').timestamp()
-    window_info['end_ts'] = dt.strptime(
-        headers[constants.WINDOW_END_KEY], '%Y-%m-%d %H:%M:%S').timestamp()
+    window_info['begin_ts'] = int(dt.strptime(
+        headers[constants.WINDOW_BEGIN_KEY], '%Y-%m-%d %H:%M:%S').timestamp())
+    window_info['end_ts'] = int(dt.strptime(
+        headers[constants.WINDOW_END_KEY], '%Y-%m-%d %H:%M:%S').timestamp())
     window_info['duration'] = window_info['end_ts'] - window_info['begin_ts']
     logger.debug(dumps(window_info, indent=4, ensure_ascii=False))
 
