@@ -24,7 +24,8 @@ schema = compile_schema({
         },
         'Tempo estimado': {
             'description': 'Duração estimada do job',
-            'type': 'string'
+            'type': 'string',
+            'pattern': '\\d.+hora|horas'
         }
     }
 })
