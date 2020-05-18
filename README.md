@@ -50,4 +50,4 @@ $ flask run --host=0.0.0.0 --port=8080
 
 The unit tests can be executed in the section below:
 
-- [integration tests](tests)
+- [integration tests](tests/integration)
