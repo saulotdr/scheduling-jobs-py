@@ -1,6 +1,6 @@
-import src.constants
-import src.response
-import src.validation
+import src.constants as constants
+import src.response as response
+import src.validation as validation
 
 from datetime import datetime as dt
 from fastjsonschema import JsonSchemaException
@@ -22,7 +22,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 window_info = dict()
 
 
-@app.route('/api/jobs', methods=['POST'])
+@app.route(constants.POST_ROUTE, methods=['POST'])
 def process_jobs_array():
     logger.debug('Headers: {0}'.format(request.headers))
     logger.debug('Data: {0}'.format(dumps(request.json,
@@ -46,8 +46,7 @@ def validate_input():
         raise JsonSchemaException('Header must contains "JANELA_FIM"')
     if payload is None or not payload:
         raise JsonSchemaException('Payload must not be empty')
-    validation.schema(payload)
-    # validation.window(headers)
+    validation.validate(payload)
 
 
 def fill_window():
@@ -98,6 +97,10 @@ def get_jobid_array():
             break
         for job in jobs_sorted:
             if job['duration'] > remaining_window_time:
+                current_window_limit = window_info['begin_ts'] + constants.WINDOW_DURATION * (window + 1)
+                if job['timestamp'] < current_window_limit:
+                    logger.debug('Two conflitant jobs. Check your input')
+                    return list()
                 logger.debug('Window is full. Jumping to the next one')
                 break
             window_list.append(job['id'])

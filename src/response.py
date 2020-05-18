@@ -1,4 +1,4 @@
-import src.constants
+import src.constants as constants
 
 import logging
 from flask import jsonify
