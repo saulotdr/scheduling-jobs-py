@@ -54,8 +54,8 @@ def test_process_jobs_array_dataset2(client, expected_body_dataset2):
 
     import pytest
 
-def test_process_jobs_array_dataset3(client, expected_body_conflitant_dataset):
-    data_file = open('res/jobs_datasets3.json').read()
+def test_process_jobs_array_conflitant(client, expected_body_conflitant_dataset):
+    data_file = open('res/jobs_conflitant.json').read()
     data = json.loads(data_file)
     response = client.post(POST_ROUTE, 
             json=data,
