@@ -42,7 +42,7 @@ In the project's root folder, run the flask app globally and with the desired po
 
 ```
 $ pipenv shell
-$ export FLASK_APP=src/route.py
+$ export FLASK_APP=src/app.py
 $ flask run --host=0.0.0.0 --port=8080
 ```
 
